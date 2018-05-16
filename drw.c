@@ -6,7 +6,7 @@
 #include <X11/Xft/Xft.h>
 
 #include "drw.h"
-#include "util.h"
+#include "dwm.h"
 
 #define UTF_INVALID 0xFFFD
 #define UTF_SIZ     4
