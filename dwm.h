@@ -72,7 +72,7 @@ struct Monitor {
 	int mx, my, mw, mh;   /* screen size */
 	int wx, wy, ww, wh;   /* window area  */
 	unsigned int seltags;
-	unsigned int sellt;
+        unsigned int sellt;   /* ??? index of the lt[], 0 or 1 */
 	unsigned int tagset[2];
 	int showbar;
 	int topbar;
@@ -81,7 +81,7 @@ struct Monitor {
 	Client *stack;
 	Monitor *next;
 	Window barwin;
-	const Layout *lt[2];
+        const Layout *lt[2];  /* ??? current and last used layouts */
 };
 
 typedef struct {

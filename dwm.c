@@ -295,9 +295,7 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 	return *x != c->x || *y != c->y || *w != c->w || *h != c->h;
 }
 
-void
-arrange(Monitor *m)
-{
+void arrange(Monitor *m){
 	if (m)
 		showhide(m->stack);
 	else for (m = mons; m; m = m->next)
@@ -309,12 +307,12 @@ arrange(Monitor *m)
 		arrangemon(m);
 }
 
-void
-arrangemon(Monitor *m)
-{
-	strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
-	if (m->lt[m->sellt]->arrange)
-		m->lt[m->sellt]->arrange(m);
+void arrangemon(Monitor *m) {
+    
+    strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
+    
+    if (m->lt[m->sellt]->arrange)
+	m->lt[m->sellt]->arrange(m);
 }
 
 void
@@ -1096,9 +1094,8 @@ movemouse(const Arg *arg)
 	}
 }
 
-Client *
-nexttiled(Client *c)
-{
+Client *nexttiled(Client *c){
+    
 	for (; c && (c->isfloating || !ISVISIBLE(c)); c = c->next);
 	return c;
 }
@@ -1401,18 +1398,19 @@ setfullscreen(Client *c, int fullscreen)
 	}
 }
 
-void
-setlayout(const Arg *arg)
-{
+void setlayout(const Arg *arg){
+    
 	if (!arg || !arg->v || arg->v != selmon->lt[selmon->sellt])
-		selmon->sellt ^= 1;
+	    selmon->sellt ^= 1; /* ^for preserving last layout in memory */
 	if (arg && arg->v)
-		selmon->lt[selmon->sellt] = (Layout *)arg->v;
+	    selmon->lt[selmon->sellt] = (Layout *)arg->v;
+	
 	strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
+	
 	if (selmon->sel)
-		arrange(selmon);
+	    arrange(selmon);
 	else
-		drawbar(selmon);
+	    drawbar(selmon);
 }
 
 /* arg > 1.0 will set mfact absolutely */
