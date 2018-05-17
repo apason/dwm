@@ -93,6 +93,12 @@ typedef struct {
 	int monitor;
 } Rule;
 
+typedef struct {
+    const char *name;
+    unsigned int tagno;
+    Layout      *layout;
+} Tag;
+
 /* from layouyts.c */
 extern void monocle(Monitor *m);
 extern void grid   (Monitor *m);

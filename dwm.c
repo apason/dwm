@@ -152,6 +152,9 @@ static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void zoom(const Arg *arg);
 
+static unsigned int log2_(unsigned int ui);
+static Layout *findLayout(unsigned int ui);
+
 /* variables */
 static const char broken[] = "broken";
 static char stext[256];
@@ -348,7 +351,7 @@ buttonpress(XEvent *e)
 	if (ev->window == selmon->barwin) {
 		i = x = 0;
 		do
-			x += TEXTW(tags[i]);
+		        x += TEXTW(tags[i].name);
 		while (ev->x >= x && ++i < LENGTH(tags));
 		if (i < LENGTH(tags)) {
 			click = ClkTagBar;
@@ -631,9 +634,9 @@ drawbar(Monitor *m)
 	}
 	x = 0;
 	for (i = 0; i < LENGTH(tags); i++) {
-		w = TEXTW(tags[i]);
+		w = TEXTW(tags[i].name);
 		drw_setscheme(drw, scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
-		drw_text(drw, x, 0, w, bh, lrpad / 2, tags[i], urg & 1 << i);
+		drw_text(drw, x, 0, w, bh, lrpad / 2, tags[i].name, urg & 1 << i);
 		if (occ & 1 << i)
 			drw_rect(drw, x + boxs, boxs, boxw, boxw,
 				m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
@@ -1402,8 +1405,10 @@ void setlayout(const Arg *arg){
     
 	if (!arg || !arg->v || arg->v != selmon->lt[selmon->sellt])
 	    selmon->sellt ^= 1; /* ^for preserving last layout in memory */
-	if (arg && arg->v)
+	if (arg && arg->v){
 	    selmon->lt[selmon->sellt] = (Layout *)arg->v;
+	    tags[log2_(selmon->tagset[selmon->seltags])].layout = (Layout *) arg->v;
+	}
 	
 	strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
 	
@@ -1909,16 +1914,22 @@ updatewmhints(Client *c)
 	}
 }
 
-void
-view(const Arg *arg)
-{
-	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
-		return;
-	selmon->seltags ^= 1; /* toggle sel tagset */
-	if (arg->ui & TAGMASK)
-		selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
-	focus(NULL);
-	arrange(selmon);
+void view(const Arg *arg) {
+    
+    if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
+	return;
+    
+    selmon->seltags ^= 1; /* toggle sel tagset */
+    
+    if (arg->ui & TAGMASK)
+	selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
+
+    selmon->lt[selmon->sellt] = findLayout(arg->ui);
+    strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
+
+    
+    focus(NULL);
+    arrange(selmon);
 }
 
 Client *
@@ -2019,4 +2030,18 @@ main(int argc, char *argv[])
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
+}
+
+
+
+static Layout *findLayout(unsigned int ui){
+    int i = log2_(ui);
+    return tags[i].layout;
+}
+
+
+static unsigned int log2_(unsigned int ui){
+    int i;
+    for(i = 0; ui > 1; ui >>= 1, i++);
+    return i;
 }
